@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FACEA AI - Universidad de Nariño</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Manrope:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #101316;
+        --paper: #f5f1ea;
+        --accent: #c5422c;
+        --accent-dark: #8f2c1b;
+        --sage: #7b8a7a;
+        --glow: rgba(197, 66, 44, 0.25);
+        --shadow: 0 20px 60px rgba(16, 19, 22, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Manrope", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(1200px 700px at 15% 10%, #fff, transparent 60%),
+          radial-gradient(900px 600px at 85% 20%, #f2e6da, transparent 55%),
+          linear-gradient(120deg, #f7f3ee 0%, #efe7dc 35%, #f7f2ea 100%);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      main {
+        position: relative;
+      }
+
+      .noise {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+        z-index: 0;
+      }
+
+      .container {
+        width: min(1120px, 92vw);
+        margin: 0 auto;
+      }
+
+      header {
+        padding: 28px 0 0;
+        position: relative;
+        z-index: 2;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(130deg, var(--accent), #e07a53);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-family: "Fraunces", serif;
+        font-size: 20px;
+        box-shadow: 0 15px 30px var(--glow);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 40px;
+        align-items: center;
+        padding: 80px 0 60px;
+        position: relative;
+        z-index: 1;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Fraunces", serif;
+        margin: 0 0 16px;
+      }
+
+      h1 {
+        font-size: clamp(2.4rem, 3vw + 1rem, 4.2rem);
+        line-height: 1.05;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        max-width: 520px;
+      }
+
+      .hero-highlight {
+        color: var(--accent-dark);
+        font-weight: 700;
+      }
+
+      .cta-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 26px;
+      }
+
+      .btn {
+        padding: 14px 24px;
+        border-radius: 999px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(130deg, var(--accent), #e07a53);
+        color: #fff;
+        box-shadow: 0 12px 30px var(--glow);
+      }
+
+      .btn-secondary {
+        background: #fff;
+        color: var(--ink);
+        border: 1px solid rgba(16, 19, 22, 0.12);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .hero-card {
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: 28px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(14px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-card::after {
+        content: "";
+        position: absolute;
+        inset: -40% 40% 40% -40%;
+        background: linear-gradient(130deg, transparent, rgba(197, 66, 44, 0.18), transparent);
+        animation: sweep 6s ease-in-out infinite;
+      }
+
+      .ai-console {
+        border-radius: 20px;
+        background: #0f1318;
+        color: #f7f2ea;
+        padding: 24px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      }
+
+      .ai-console strong {
+        color: #f4b79f;
+      }
+
+      .ai-console .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 16px;
+        background: #f4b79f;
+        margin-left: 6px;
+        animation: blink 1s steps(2) infinite;
+      }
+
+      .floating-orb {
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(197, 66, 44, 0.28) 0%, transparent 70%);
+        top: -40px;
+        right: -20px;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      section {
+        padding: 60px 0;
+        position: relative;
+        z-index: 1;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 24px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.78);
+        border-radius: 24px;
+        padding: 24px;
+        border: 1px solid rgba(16, 19, 22, 0.08);
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-6px);
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(197, 66, 44, 0.12);
+        color: var(--accent-dark);
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+        margin-bottom: 14px;
+      }
+
+      .manifesto {
+        background: #1c1f25;
+        color: #f7f2ea;
+        border-radius: 32px;
+        padding: 40px;
+        box-shadow: var(--shadow);
+      }
+
+      .manifesto p {
+        line-height: 1.8;
+        margin: 0;
+      }
+
+      .steps {
+        display: grid;
+        gap: 20px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .step span {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: rgba(197, 66, 44, 0.12);
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: var(--accent-dark);
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(25px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+
+      .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes sweep {
+        0% {
+          transform: translateX(-60%);
+        }
+        50% {
+          transform: translateX(30%);
+        }
+        100% {
+          transform: translateX(120%);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .hero {
+          padding: 60px 0 40px;
+        }
+        .manifesto {
+          padding: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="noise"></div>
+    <main>
+      <header class="container">
+        <div class="brand">
+          <div class="brand-mark">FA</div>
+          <div>
+            FACEA AI
+            <div style="font-size: 0.85rem; color: var(--sage);">Universidad de Nariño</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="container hero">
+        <div class="reveal" data-delay="0">
+          <div class="tag">Idea a medida</div>
+          <h1>
+            La inteligencia artificial creada para
+            <span class="hero-highlight">elevar tu nivel universitario</span>.
+          </h1>
+          <p>
+            Esta es una propuesta diferente: hecha para que puedas sacar el maximo provecho de la
+            inteligencia artificial, llevando tu conocimiento y tus habilidades a un siguiente nivel.
+            Con el contexto que tu le das, nace una version mejorada de ti, pero universitaria.
+          </p>
+          <div class="cta-group">
+            <button class="btn btn-primary">Entrar a FACEA AI</button>
+            <button class="btn btn-secondary">Ver como funciona</button>
+          </div>
+        </div>
+        <div class="hero-card reveal" data-delay="150">
+          <div class="floating-orb"></div>
+          <div class="ai-console">
+            <div><strong>Contexto:</strong> carrera, proyectos, intereses, retos actuales.</div>
+            <div><strong>Proceso:</strong> la IA conecta tu historia con planes accionables.</div>
+            <div><strong>Salida:</strong> guia personalizada para <span id="hero-rotate">investigacion</span>.<span class="cursor"></span></div>
+          </div>
+          <div style="margin-top: 18px; color: var(--sage); font-size: 0.95rem;">
+            Se adapta a tus materias, tu ritmo y tu ambicion.
+          </div>
+        </div>
+      </section>
+
+      <section class="container">
+        <div class="grid-3">
+          <div class="card reveal" data-delay="0">
+            <div class="tag">Personalizacion profunda</div>
+            <h3>IA que entiende tu contexto</h3>
+            <p>
+              No es una herramienta generica: se alimenta de tu entorno academico y te devuelve
+              claridad para decidir y ejecutar.
+            </p>
+          </div>
+          <div class="card reveal" data-delay="120">
+            <div class="tag">Aprendizaje acelerado</div>
+            <h3>Transforma tareas en avances</h3>
+            <p>
+              Convierte dudas en rutas de estudio, proyectos en resultados y competencias en
+              oportunidades reales.
+            </p>
+          </div>
+          <div class="card reveal" data-delay="240">
+            <div class="tag">Nuevo yo universitario</div>
+            <h3>Version mejorada de ti</h3>
+            <p>
+              Integra lo que has aprendido para desbloquear una etapa mas estrategica, segura y
+              creativa.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="container">
+        <div class="manifesto reveal" data-delay="0">
+          <h2>Un manifiesto para ir mas lejos</h2>
+          <p>
+            FACEA AI nace en la Universidad de Nariño para impulsar a sus estudiantes. Es una idea
+            diferente, construida para exprimir cada clase, cada proyecto y cada logro. Tu historia
+            academica se vuelve el combustible de una inteligencia artificial que te acompana con
+            estrategia, direccion y accion.
+          </p>
+        </div>
+      </section>
+
+      <section class="container">
+        <h2 class="reveal" data-delay="0">Como funciona</h2>
+        <div class="steps">
+          <div class="step reveal" data-delay="80">
+            <span>1</span>
+            <div>
+              <h3>Comparte tu contexto</h3>
+              <p>Metas, materias, proyectos, estilo de estudio y lo que quieres lograr.</p>
+            </div>
+          </div>
+          <div class="step reveal" data-delay="160">
+            <span>2</span>
+            <div>
+              <h3>Recibe un plan accionable</h3>
+              <p>Rutas claras, micro-objetivos y recomendaciones hechas para tu realidad.</p>
+            </div>
+          </div>
+          <div class="step reveal" data-delay="240">
+            <span>3</span>
+            <div>
+              <h3>Itera y escala</h3>
+              <p>La IA aprende de tu progreso y te eleva al siguiente nivel.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="container" style="padding-bottom: 90px;">
+        <div class="hero-card reveal" data-delay="0">
+          <h2>Listo para desbloquear tu potencial?</h2>
+          <p>
+            Ingresa, comparte tu contexto y deja que FACEA AI te lleve a la mejor version de tu
+            perfil universitario.
+          </p>
+          <div class="cta-group">
+            <button class="btn btn-primary">Iniciar ahora</button>
+            <button class="btn btn-secondary">Hablar con un mentor</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const reveals = document.querySelectorAll(".reveal");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const delay = entry.target.getAttribute("data-delay") || 0;
+              entry.target.style.transitionDelay = `${delay}ms`;
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      reveals.forEach((item) => observer.observe(item));
+
+      const rotateItems = ["investigacion", "proyectos", "aprendizaje", "liderazgo"]; 
+      const rotateTarget = document.getElementById("hero-rotate");
+      let rotateIndex = 0;
+      setInterval(() => {
+        rotateIndex = (rotateIndex + 1) % rotateItems.length;
+        rotateTarget.style.opacity = 0;
+        setTimeout(() => {
+          rotateTarget.textContent = rotateItems[rotateIndex];
+          rotateTarget.style.opacity = 1;
+        }, 250);
+      }, 2400);
+    </script>
+  </body>
+</html>

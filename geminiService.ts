@@ -49,9 +49,9 @@ export const getGeminiStreamResponse = async (
     });
   }
 
-  // Uso de Gemini 3 Pro para garantizar la mejor calidad de razonamiento
+  // Uso de Gemini 1.5 Pro (versión estable)
   return ai.models.generateContentStream({
-    model: "gemini-3-pro-preview",
+    model: "gemini-1.5-pro",
     contents: [
       ...history,
       { role: 'user', parts: userParts }
