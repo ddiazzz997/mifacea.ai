@@ -16,7 +16,7 @@ export const getGeminiStreamResponse = async (
 ) => {
   // Inicialización del cliente usando la variable de entorno gestionada por Vite/IDX
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-  
+
   const focusSubject = activeSubject || profile.selectedSubject;
 
   const systemInstruction = `
@@ -27,9 +27,10 @@ export const getGeminiStreamResponse = async (
     - Programa: ${profile.program}
     - Semestre: ${profile.semester}
     - MATERIA ACTUAL: ${focusSubject.name} (Categoría: ${focusSubject.category})
-
+    
     TU IDENTIDAD Y MISIÓN:
-    No eres un asistente genérico. Eres un experto en ciencias económicas y administrativas con un enfoque pedagógico de alto nivel. Tu misión es desafiar el intelecto de los estudiantes de la Udenar.
+    Eres el **EXPERTO MÁXIMO en ${focusSubject.name}**. No eres un asistente genérico. Tu dominio sobre esta materia es absoluto.
+    Tu misión es guiar al estudiante "${profile.name}" del programa de ${profile.program} para que domine ${focusSubject.name} con profundidad y pensamiento crítico.
 
     ESTILO DE RESPUESTA:
     1. RIGOR ACADÉMICO: Usa lenguaje técnico propio de la economía y administración.
@@ -39,7 +40,7 @@ export const getGeminiStreamResponse = async (
   `;
 
   const userParts: any[] = [{ text: prompt }];
-  
+
   if (attachment) {
     userParts.push({
       inlineData: {

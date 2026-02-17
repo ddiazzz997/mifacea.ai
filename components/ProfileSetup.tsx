@@ -15,8 +15,8 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
   const [semester, setSemester] = useState<number>(1);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
 
-  const availableSubjects = (program && semester) 
-    ? (PROGRAM_SUBJECTS[program as Program][semester] || []) 
+  const availableSubjects = (program && semester)
+    ? (PROGRAM_SUBJECTS[program as Program][semester] || [])
     : [];
 
   const handleSubmit = () => {
@@ -51,8 +51,8 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
                 <label className="block text-slate-800 text-sm font-black mb-4 uppercase tracking-widest flex items-center gap-2">
                   <User size={18} className="text-[#D32F2F]" /> Identificación
                 </label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-5 text-slate-900 focus:outline-none focus:ring-4 focus:ring-red-500/10 focus:border-[#D32F2F] transition-all text-xl font-bold placeholder:text-slate-300"
@@ -72,11 +72,10 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
                     <button
                       key={p}
                       onClick={() => setProgram(p)}
-                      className={`w-full text-left px-6 py-4 rounded-2xl border-2 transition-all font-bold ${
-                        program === p 
-                          ? 'bg-red-50 border-[#D32F2F] text-[#D32F2F] scale-[1.02] shadow-md' 
+                      className={`w-full text-left px-6 py-4 rounded-2xl border-2 transition-all font-bold ${program === p
+                          ? 'bg-red-50 border-[#D32F2F] text-[#D32F2F] scale-[1.02] shadow-md'
                           : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       {p}
                     </button>
@@ -95,11 +94,10 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
                     <button
                       key={s}
                       onClick={() => setSemester(s)}
-                      className={`h-16 rounded-2xl border-2 flex items-center justify-center font-black text-xl transition-all ${
-                        semester === s 
-                          ? 'bg-red-50 border-[#D32F2F] text-[#D32F2F] shadow-lg shadow-red-500/10' 
+                      className={`h-16 rounded-2xl border-2 flex items-center justify-center font-black text-xl transition-all ${semester === s
+                          ? 'bg-red-50 border-[#D32F2F] text-[#D32F2F] shadow-lg shadow-red-500/10'
                           : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50 hover:border-slate-300'
-                      }`}
+                        }`}
                     >
                       {s}
                     </button>
@@ -114,16 +112,15 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
                   <BookOpen size={18} className="text-[#D32F2F]" /> Materia de Enfoque
                 </label>
                 <p className="text-slate-400 text-xs mb-4">Selecciona la materia que deseas potenciar con IA</p>
-                <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                   {availableSubjects.map((sub) => (
                     <button
                       key={sub.id}
                       onClick={() => setSelectedSubject(sub)}
-                      className={`w-full text-left px-6 py-4 rounded-2xl border-2 transition-all font-bold ${
-                        selectedSubject?.id === sub.id 
-                          ? 'bg-red-50 border-[#D32F2F] text-[#D32F2F] scale-[1.01] shadow-md' 
+                      className={`w-full text-left px-6 py-4 rounded-2xl border-2 transition-all font-bold ${selectedSubject?.id === sub.id
+                          ? 'bg-red-50 border-[#D32F2F] text-[#D32F2F] scale-[1.01] shadow-md'
                           : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       <div className="flex justify-between items-center">
                         <span>{sub.name}</span>
@@ -141,14 +138,14 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onComplete }) => {
 
           <div className="mt-10 flex gap-4">
             {step > 1 && (
-              <button 
+              <button
                 onClick={() => setStep(step - 1)}
                 className="flex-1 py-4 text-slate-400 font-black hover:text-slate-900 transition-colors uppercase tracking-widest text-xs"
               >
                 Regresar
               </button>
             )}
-            <button 
+            <button
               onClick={() => step < 4 ? setStep(step + 1) : handleSubmit()}
               disabled={(step === 1 && !name) || (step === 2 && !program) || (step === 4 && !selectedSubject)}
               className="flex-[2] py-5 bg-black text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-[#D32F2F] transition-all duration-300 shadow-xl disabled:opacity-30 disabled:grayscale"

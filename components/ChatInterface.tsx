@@ -29,11 +29,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onLogout }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [attachment, setAttachment] = useState<FileAttachment | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const subjects = PROGRAM_SUBJECTS[profile.program][profile.semester] || [];
+  const [localSubjects, setLocalSubjects] = useState<Subject[]>([]);
+
+  const subjects = [...(PROGRAM_SUBJECTS[profile.program][profile.semester] || []), ...localSubjects];
+
+  const handleAddSubject = () => {
+    const newSubjectName = prompt("Nombre de la nueva materia:");
+    if (newSubjectName && newSubjectName.trim() !== "") {
+      const newSubject: Subject = {
+        id: `custom-${Date.now()}`,
+        name: newSubjectName,
+        category: 'Personalizada'
+      };
+      setLocalSubjects([...localSubjects, newSubject]);
+      setActiveSubject(newSubject);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,14 +69,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ profile, onLogout }) => {
 Has activado el módulo de **${focusSub.name}**. Estoy listo para actuar como tu mentor senior de FACEA. 
 
 Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy para llevar tu pensamiento al siguiente nivel? Recuerda que puedes **adjuntar fotos de tus apuntes o documentos** para un análisis más profundo.`;
-    
+
     const welcome: Message = {
       id: 'welcome-' + Date.now(),
       role: 'model',
       content: welcomeText,
       timestamp: new Date()
     };
-    
+
     const newSession: ChatSession = {
       id: Date.now().toString(),
       title: focusSub ? `Foco: ${focusSub.name}` : 'Consulta FACEA',
@@ -115,7 +130,7 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    
+
     const currentAttachment = attachment;
     setInput('');
     setAttachment(null);
@@ -128,10 +143,10 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
 
     try {
       const stream = await getGeminiStreamResponse(messageText || "Analiza el adjunto académico", profile, activeSubject, history, currentAttachment);
-      
+
       let fullContent = '';
       const modelMessageId = (Date.now() + 1).toString();
-      
+
       setMessages(prev => [...prev, {
         id: modelMessageId,
         role: 'model',
@@ -144,10 +159,10 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
         const text = c.text || '';
         fullContent += text;
         setMessages(prev => {
-            const updated = prev.map(m => 
-              m.id === modelMessageId ? { ...m, content: fullContent } : m
-            );
-            return updated;
+          const updated = prev.map(m =>
+            m.id === modelMessageId ? { ...m, content: fullContent } : m
+          );
+          return updated;
         });
       }
     } catch (error) {
@@ -167,7 +182,7 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans">
       {/* Botón flotante para móvil */}
       {!isSidebarOpen && (
-        <button 
+        <button
           onClick={() => setIsSidebarOpen(true)}
           className="fixed top-6 left-6 z-40 p-4 bg-white border-2 border-slate-100 rounded-2xl shadow-2xl text-[#D32F2F] hover:scale-110 active:scale-95 transition-all lg:hidden"
         >
@@ -188,7 +203,7 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
             </button>
           </div>
 
-          <button 
+          <button
             onClick={() => startNewChat()}
             className="w-full flex items-center justify-center gap-3 py-4 bg-white border-2 border-slate-200 rounded-2xl text-slate-800 font-black text-sm uppercase tracking-widest hover:border-[#D32F2F] hover:text-[#D32F2F] hover:shadow-lg hover:shadow-red-500/10 transition-all mb-8 group"
           >
@@ -202,11 +217,11 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
               </h3>
               <div className="space-y-1">
                 {sessions.map(s => (
-                  <button 
+                  <button
                     key={s.id}
                     onClick={() => {
-                        setCurrentSessionId(s.id);
-                        setMessages(s.messages);
+                      setCurrentSessionId(s.id);
+                      setMessages(s.messages);
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-bold text-xs ${currentSessionId === s.id ? 'bg-red-50 text-[#D32F2F] border border-red-100' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}
                   >
@@ -223,7 +238,7 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
               </h3>
               <div className="space-y-1">
                 {subjects.map(s => (
-                  <button 
+                  <button
                     key={s.id}
                     onClick={() => setActiveSubject(s)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left font-bold text-xs ${activeSubject?.id === s.id ? 'bg-[#D32F2F] text-white shadow-xl shadow-red-500/20' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}
@@ -233,6 +248,13 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
                   </button>
                 ))}
               </div>
+
+              <button
+                onClick={handleAddSubject}
+                className="w-full flex items-center gap-2 px-4 py-2 mt-4 text-[10px] font-black uppercase tracking-widest text-[#D32F2F] hover:bg-red-50 rounded-xl transition-all border border-dashed border-red-200"
+              >
+                <Plus size={12} /> Agregar Materia
+              </button>
             </div>
           </div>
 
@@ -247,7 +269,7 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
                 <p className="text-[9px] font-black text-slate-400 truncate uppercase tracking-tighter">{profile.program}</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={onLogout}
               className="w-full flex items-center gap-2 px-4 py-3 rounded-2xl text-slate-400 hover:text-[#D32F2F] hover:bg-red-50 transition-all text-xs font-black uppercase tracking-widest border border-transparent hover:border-red-100"
             >
@@ -285,18 +307,16 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
             {messages.map((m) => (
               <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} group animate-in fade-in slide-in-from-bottom-4 duration-500`}>
                 <div className={`flex gap-5 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-lg transition-all group-hover:scale-110 ${
-                    m.role === 'user' ? 'bg-[#D32F2F] border-2 border-red-400' : 'bg-white border-2 border-slate-100'
-                  }`}>
+                  <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-lg transition-all group-hover:scale-110 ${m.role === 'user' ? 'bg-[#D32F2F] border-2 border-red-400' : 'bg-white border-2 border-slate-100'
+                    }`}>
                     {/* Fixed missing User icon by importing it from lucide-react */}
                     {m.role === 'user' ? <User size={22} className="text-white" /> : <Bot size={22} className="text-[#D32F2F]" />}
                   </div>
                   <div className={`space-y-2.5 relative ${m.role === 'user' ? 'text-right' : ''}`}>
-                    <div className={`rounded-3xl px-7 py-5 text-[15px] leading-relaxed shadow-xl border relative transition-all ${
-                      m.role === 'user' 
-                        ? 'bg-slate-900 text-white border-slate-800' 
-                        : 'bg-white border-slate-50 text-slate-700'
-                    }`}>
+                    <div className={`rounded-3xl px-7 py-5 text-[15px] leading-relaxed shadow-xl border relative transition-all ${m.role === 'user'
+                      ? 'bg-slate-900 text-white border-slate-800'
+                      : 'bg-white border-slate-50 text-slate-700'
+                      }`}>
                       {m.content.split('\n').map((line, i) => (
                         <p key={i} className={line.trim() === '' ? 'h-3' : 'mb-3 last:mb-0'}>
                           {line.split('**').map((part, j) => (
@@ -304,10 +324,10 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
                           ))}
                         </p>
                       ))}
-                      
+
                       {/* Botón de copiar para respuestas de la IA */}
                       {m.role === 'model' && m.content && (
-                        <button 
+                        <button
                           onClick={() => handleCopy(m.content, m.id)}
                           className="absolute -right-12 top-0 p-2 text-slate-300 hover:text-[#D32F2F] opacity-0 group-hover:opacity-100 transition-all"
                         >
@@ -316,15 +336,15 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
                       )}
                     </div>
                     <div className="flex items-center gap-2 justify-end px-4">
-                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
                         {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {m.role === 'user' ? 'ESTUDIANTE' : 'FACEA.AI'}
-                        </p>
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-            
+
             {isTyping && (
               <div className="flex justify-start animate-in fade-in duration-300">
                 <div className="flex gap-5">
@@ -345,68 +365,68 @@ Dime, ¿qué concepto, caso de estudio o proyecto quieres que analicemos hoy par
 
         {/* Barra de Entrada de Datos */}
         <div className="p-8 md:p-14 bg-white/80 backdrop-blur-md flex flex-col items-center border-t border-slate-50">
-            {attachment && (
-              <div className="w-full max-w-4xl mb-5 animate-in slide-in-from-bottom-4 duration-300">
-                <div className="inline-flex items-center gap-4 px-5 py-3 bg-red-50 border border-red-100 rounded-2xl shadow-xl shadow-red-500/5 group">
-                  <div className="w-8 h-8 bg-[#D32F2F] rounded-xl flex items-center justify-center text-white">
-                    <Plus size={16} />
-                  </div>
-                  <span className="text-sm font-bold text-slate-800 truncate max-w-[250px]">{attachment.name}</span>
-                  <button onClick={() => setAttachment(null)} className="p-1.5 hover:bg-red-200 rounded-full transition-colors text-[#D32F2F]">
-                    <X size={16} />
-                  </button>
+          {attachment && (
+            <div className="w-full max-w-4xl mb-5 animate-in slide-in-from-bottom-4 duration-300">
+              <div className="inline-flex items-center gap-4 px-5 py-3 bg-red-50 border border-red-100 rounded-2xl shadow-xl shadow-red-500/5 group">
+                <div className="w-8 h-8 bg-[#D32F2F] rounded-xl flex items-center justify-center text-white">
+                  <Plus size={16} />
                 </div>
+                <span className="text-sm font-bold text-slate-800 truncate max-w-[250px]">{attachment.name}</span>
+                <button onClick={() => setAttachment(null)} className="p-1.5 hover:bg-red-200 rounded-full transition-colors text-[#D32F2F]">
+                  <X size={16} />
+                </button>
               </div>
-            )}
-            
-            <div className="w-full max-w-5xl flex items-center gap-5 relative">
-                <div className="relative group">
-                    <input 
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                        accept="image/*,.pdf,.doc,.docx,.txt"
-                    />
-                    <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="p-6 bg-white border-2 border-slate-100 text-[#D32F2F] rounded-full hover:bg-red-50 hover:border-[#D32F2F] hover:scale-110 active:scale-95 transition-all shadow-xl flex items-center justify-center group relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-red-600 scale-0 group-hover:scale-100 transition-transform origin-center opacity-0 group-hover:opacity-5" />
-                        <CirclePlus size={32} className="group-hover:rotate-90 transition-transform duration-500" />
-                    </button>
-                </div>
+            </div>
+          )}
 
-                <div className="flex-1 relative">
-                    <input 
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                        placeholder={activeSubject ? `Consulta al Mentor sobre ${activeSubject.name}...` : "Escribe tu desafío académico..."}
-                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] py-7 pl-12 pr-24 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-12 focus:ring-red-500/5 focus:bg-white focus:border-[#D32F2F] transition-all shadow-2xl text-lg font-bold"
-                    />
-                    <button 
-                        onClick={() => handleSend()}
-                        disabled={(!input.trim() && !attachment) || isTyping}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-5 bg-black text-white rounded-full hover:bg-[#D32F2F] transition-all hover:scale-105 active:scale-90 shadow-2xl disabled:opacity-20 disabled:grayscale disabled:scale-100 group"
-                    >
-                        <Send size={28} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </button>
-                </div>
+          <div className="w-full max-w-5xl flex items-center gap-5 relative">
+            <div className="relative group">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/*,.pdf,.doc,.docx,.txt"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-6 bg-white border-2 border-slate-100 text-[#D32F2F] rounded-full hover:bg-red-50 hover:border-[#D32F2F] hover:scale-110 active:scale-95 transition-all shadow-xl flex items-center justify-center group relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-red-600 scale-0 group-hover:scale-100 transition-transform origin-center opacity-0 group-hover:opacity-5" />
+                <CirclePlus size={32} className="group-hover:rotate-90 transition-transform duration-500" />
+              </button>
             </div>
-            
-            <div className="mt-8 flex flex-wrap justify-center gap-8 md:gap-14 text-[9px] text-slate-400 uppercase tracking-[0.5em] font-black">
-                <span className="flex items-center gap-2.5 group cursor-default">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> NODO FACEA ONLINE
-                </span>
-                <span className="flex items-center gap-2.5 group cursor-default">
-                    <GraduationCap size={14} className="group-hover:text-[#D32F2F] transition-colors" /> UNIVERSIDAD DE NARIÑO
-                </span>
-                <span className="hidden sm:flex items-center gap-2.5 group cursor-default">
-                    <Lightbulb size={14} className="group-hover:text-yellow-500 transition-colors" /> POTENCIADO POR GEMINI 3 PRO
-                </span>
+
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                placeholder={activeSubject ? `Consulta al Mentor sobre ${activeSubject.name}...` : "Escribe tu desafío académico..."}
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] py-7 pl-12 pr-24 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-12 focus:ring-red-500/5 focus:bg-white focus:border-[#D32F2F] transition-all shadow-2xl text-lg font-bold"
+              />
+              <button
+                onClick={() => handleSend()}
+                disabled={(!input.trim() && !attachment) || isTyping}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-5 bg-black text-white rounded-full hover:bg-[#D32F2F] transition-all hover:scale-105 active:scale-90 shadow-2xl disabled:opacity-20 disabled:grayscale disabled:scale-100 group"
+              >
+                <Send size={28} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </button>
             </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-8 md:gap-14 text-[9px] text-slate-400 uppercase tracking-[0.5em] font-black">
+            <span className="flex items-center gap-2.5 group cursor-default">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> NODO FACEA ONLINE
+            </span>
+            <span className="flex items-center gap-2.5 group cursor-default">
+              <GraduationCap size={14} className="group-hover:text-[#D32F2F] transition-colors" /> UNIVERSIDAD DE NARIÑO
+            </span>
+            <span className="hidden sm:flex items-center gap-2.5 group cursor-default">
+              <Lightbulb size={14} className="group-hover:text-yellow-500 transition-colors" /> POTENCIADO POR GEMINI 1.5 PRO
+            </span>
+          </div>
         </div>
       </div>
     </div>
