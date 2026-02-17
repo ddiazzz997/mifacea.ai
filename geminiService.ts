@@ -14,8 +14,16 @@ export const getGeminiStreamResponse = async (
   history: { role: 'user' | 'model'; parts: { text: string }[] }[],
   attachment?: FileAttachment | null
 ) => {
-  // Inicialización del cliente usando la variable de entorno gestionada por Vite/IDX
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+  // Inicialización del cliente usando la variable de entorno gestionada por Vite (VITE_API_KEY)
+  // Nota: En Vercel, debes agregar la variable de entorno como VITE_API_KEY
+  const apiKey = import.meta.env.VITE_API_KEY;
+
+  if (!apiKey) {
+    console.error("Falta VITE_API_KEY. Verifica tu archivo .env o la configuración de Vercel.");
+    // Fallback temporal para evitar crash inmediato si está mal configurado, pero no funcionará
+  }
+
+  const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
   const focusSubject = activeSubject || profile.selectedSubject;
 
